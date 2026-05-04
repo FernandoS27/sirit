@@ -7,13 +7,64 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <span>
+#include <vector>
 
 #include <sirit/sirit.h>
 
-class MyModule : public Sirit::Module {
+namespace {
+
+int g_total = 0;
+int g_failures = 0;
+const char* g_current_test = "";
+
+#define CHECK(cond)                                                                                \
+    do {                                                                                           \
+        ++g_total;                                                                                 \
+        if (!(cond)) {                                                                             \
+            ++g_failures;                                                                          \
+            std::fprintf(stderr, "  FAIL [%s] %s:%d: %s\n", g_current_test, __FILE__, __LINE__,    \
+                         #cond);                                                                   \
+        }                                                                                          \
+    } while (0)
+
+#define RUN_TEST(fn)                                                                               \
+    do {                                                                                           \
+        g_current_test = #fn;                                                                      \
+        const int before = g_failures;                                                             \
+        fn();                                                                                      \
+        std::fprintf(stderr, "%-32s %s\n", #fn, g_failures == before ? "ok" : "FAILED");           \
+    } while (0)
+
+struct Instruction {
+    spv::Op opcode;
+    std::uint32_t word_count;
+    const std::uint32_t* words;
+};
+
+std::vector<Instruction> ParseInstructions(const std::vector<std::uint32_t>& code) {
+    std::vector<Instruction> out;
+    if (code.size() < 5) {
+        return out;
+    }
+    std::size_t i = 5;
+    while (i < code.size()) {
+        const std::uint32_t header = code[i];
+        const std::uint32_t op = header & 0xffffu;
+        const std::uint32_t wc = header >> 16;
+        if (wc == 0 || i + wc > code.size()) {
+            break;
+        }
+        out.push_back({static_cast<spv::Op>(op), wc, &code[i]});
+        i += wc;
+    }
+    return out;
+}
+
+class VertexModule : public Sirit::Module {
 public:
-    MyModule() : Sirit::Module{0x00010300} {}
-    ~MyModule() = default;
+    VertexModule() : Sirit::Module{0x00010300} {}
+    ~VertexModule() = default;
 
     void Generate() {
         AddCapability(spv::Capability::Shader);
@@ -68,7 +119,7 @@ public:
     }
 };
 
-static constexpr std::uint8_t expected_binary[] = {
+constexpr std::uint8_t expected_vertex_binary[] = {
     0x03, 0x02, 0x23, 0x07, 0x00, 0x03, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1d, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x02, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0e, 0x00, 0x03, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x0f, 0x00, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -124,16 +175,168 @@ static constexpr std::uint8_t expected_binary[] = {
     0xfd, 0x00, 0x01, 0x00, 0x38, 0x00, 0x01, 0x00,
 };
 
-int main(int argc, char** argv) {
-    MyModule module;
+void test_vertex_shader_golden() {
+    VertexModule module;
     module.Generate();
+    const std::vector<std::uint32_t> code = module.Assemble();
 
-    std::vector<std::uint32_t> code = module.Assemble();
-    if (std::size(code) * sizeof(std::uint32_t) != std::size(expected_binary)) {
-        return EXIT_FAILURE;
+    CHECK(code.size() * sizeof(std::uint32_t) == sizeof(expected_vertex_binary));
+    if (code.size() * sizeof(std::uint32_t) == sizeof(expected_vertex_binary)) {
+        CHECK(std::memcmp(code.data(), expected_vertex_binary, sizeof(expected_vertex_binary)) ==
+              0);
     }
-    if (std::memcmp(std::data(code), std::data(expected_binary), std::size(expected_binary)) != 0) {
-        return EXIT_FAILURE;
+}
+
+void test_module_header() {
+    Sirit::Module m{0x00010300};
+    m.SetMemoryModel(spv::AddressingModel::Logical, spv::MemoryModel::GLSL450);
+    const auto code = m.Assemble();
+
+    CHECK(code.size() >= 5);
+    CHECK(code[0] == spv::MagicNumber);
+    CHECK(code[1] == 0x00010300u);
+    CHECK(code[2] == Sirit::GENERATOR_MAGIC_NUMBER);
+    CHECK(code[3] >= 1u);
+    CHECK(code[4] == 0u);
+
+    const auto insts = ParseInstructions(code);
+    CHECK(insts.size() == 1);
+    if (!insts.empty()) {
+        CHECK(insts[0].opcode == spv::Op::OpMemoryModel);
     }
-    return EXIT_SUCCESS;
+}
+
+void test_determinism() {
+    const auto build = [] {
+        VertexModule m;
+        m.Generate();
+        return m.Assemble();
+    };
+    const auto a = build();
+    const auto b = build();
+    CHECK(a == b);
+}
+
+void test_constant_dedup() {
+    Sirit::Module m{0x00010300};
+    const auto t_uint = m.TypeInt(32, false);
+    const auto a = m.Constant(t_uint, 42u);
+    const auto b = m.Constant(t_uint, 42u);
+    const auto c = m.Constant(t_uint, 43u);
+    CHECK(a.value == b.value);
+    CHECK(a.value != c.value);
+}
+
+void test_type_dedup() {
+    Sirit::Module m{0x00010300};
+    const auto u32_a = m.TypeInt(32, false);
+    const auto u32_b = m.TypeInt(32, false);
+    const auto i32 = m.TypeInt(32, true);
+    const auto u64 = m.TypeInt(64, false);
+    CHECK(u32_a.value == u32_b.value);
+    CHECK(u32_a.value != i32.value);
+    CHECK(u32_a.value != u64.value);
+
+    const auto v4_a = m.TypeVector(m.TypeFloat(32), 4);
+    const auto v4_b = m.TypeVector(m.TypeFloat(32), 4);
+    CHECK(v4_a.value == v4_b.value);
+}
+
+void test_capability_dedup() {
+    Sirit::Module m{0x00010300};
+    m.AddCapability(spv::Capability::Shader);
+    m.AddCapability(spv::Capability::Shader);
+    m.AddCapability(spv::Capability::Float64);
+    m.SetMemoryModel(spv::AddressingModel::Logical, spv::MemoryModel::GLSL450);
+    const auto code = m.Assemble();
+
+    int shader_count = 0;
+    int float64_count = 0;
+    for (const auto& inst : ParseInstructions(code)) {
+        if (inst.opcode == spv::Op::OpCapability && inst.word_count >= 2) {
+            const auto cap = static_cast<spv::Capability>(inst.words[1]);
+            if (cap == spv::Capability::Shader) {
+                ++shader_count;
+            } else if (cap == spv::Capability::Float64) {
+                ++float64_count;
+            }
+        }
+    }
+    CHECK(shader_count == 1);
+    CHECK(float64_count == 1);
+}
+
+void test_constant_kinds() {
+    Sirit::Module m{0x00010300};
+    const auto t_bool = m.TypeBool();
+    const auto t_u32 = m.TypeInt(32, false);
+    const auto t_i32 = m.TypeInt(32, true);
+    const auto t_u64 = m.TypeInt(64, false);
+    const auto t_i64 = m.TypeInt(64, true);
+    const auto t_f32 = m.TypeFloat(32);
+    const auto t_f64 = m.TypeFloat(64);
+    const auto t_v4f32 = m.TypeVector(t_f32, 4);
+
+    CHECK(Sirit::ValidId(m.ConstantTrue(t_bool)));
+    CHECK(Sirit::ValidId(m.ConstantFalse(t_bool)));
+    CHECK(Sirit::ValidId(m.Constant(t_u32, std::uint32_t{1234})));
+    CHECK(Sirit::ValidId(m.Constant(t_i32, std::int32_t{-1234})));
+    CHECK(Sirit::ValidId(m.Constant(t_u64, std::uint64_t{0xDEADBEEFCAFEull})));
+    CHECK(Sirit::ValidId(m.Constant(t_i64, std::int64_t{-7})));
+    CHECK(Sirit::ValidId(m.Constant(t_f32, 3.14f)));
+    CHECK(Sirit::ValidId(m.Constant(t_f64, 2.718281828)));
+    CHECK(Sirit::ValidId(m.ConstantNull(t_v4f32)));
+}
+
+void test_compute_shader_execution_mode() {
+    Sirit::Module m{0x00010300};
+    m.AddCapability(spv::Capability::Shader);
+    m.SetMemoryModel(spv::AddressingModel::Logical, spv::MemoryModel::GLSL450);
+
+    const auto t_void = m.TypeVoid();
+    const auto t_func = m.TypeFunction(t_void);
+    const auto fn = m.OpFunction(t_void, spv::FunctionControlMask::MaskNone, t_func);
+    m.AddLabel();
+    m.OpReturn();
+    m.OpFunctionEnd();
+    m.AddEntryPoint(spv::ExecutionModel::GLCompute, fn, "main");
+    m.AddExecutionMode(fn, spv::ExecutionMode::LocalSize, std::uint32_t{8}, std::uint32_t{4},
+                       std::uint32_t{1});
+
+    const auto code = m.Assemble();
+    bool found_local_size = false;
+    bool found_entry_point = false;
+    for (const auto& inst : ParseInstructions(code)) {
+        if (inst.opcode == spv::Op::OpExecutionMode && inst.word_count == 6) {
+            const auto mode = static_cast<spv::ExecutionMode>(inst.words[2]);
+            if (mode == spv::ExecutionMode::LocalSize && inst.words[3] == 8u &&
+                inst.words[4] == 4u && inst.words[5] == 1u) {
+                found_local_size = true;
+            }
+        }
+        if (inst.opcode == spv::Op::OpEntryPoint && inst.word_count >= 4) {
+            const auto model = static_cast<spv::ExecutionModel>(inst.words[1]);
+            if (model == spv::ExecutionModel::GLCompute) {
+                found_entry_point = true;
+            }
+        }
+    }
+    CHECK(found_local_size);
+    CHECK(found_entry_point);
+}
+
+} // namespace
+
+int main() {
+    RUN_TEST(test_vertex_shader_golden);
+    RUN_TEST(test_module_header);
+    RUN_TEST(test_determinism);
+    RUN_TEST(test_constant_dedup);
+    RUN_TEST(test_type_dedup);
+    RUN_TEST(test_capability_dedup);
+    RUN_TEST(test_constant_kinds);
+    RUN_TEST(test_compute_shader_execution_mode);
+
+    std::fprintf(stderr, "\n%d/%d checks passed\n", g_total - g_failures, g_total);
+    return g_failures == 0 ? EXIT_SUCCESS : EXIT_FAILURE;
 }
