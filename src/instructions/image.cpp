@@ -162,7 +162,7 @@ Id Module::OpImageSparseRead(Id result_type, Id image, Id coordinate,
                              std::optional<spv::ImageOperandsMask> image_operands,
                              std::span<const Id> operands) {
     code->Reserve(5 + (image_operands.has_value() ? 1 : 0) + operands.size());
-    return *code << OpId{spv::Op::OpImageSparseTexelsResident, result_type} << image << coordinate
+    return *code << OpId{spv::Op::OpImageSparseRead, result_type} << image << coordinate
                  << image_operands << operands << EndOp{};
 }
 
