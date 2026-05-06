@@ -365,6 +365,19 @@ public:
     /// Make a copy of a vector, with a single, variably selected, component modified.
     Id OpVectorInsertDynamic(Id result_type, Id vector, Id component, Id index);
 
+    /// Select arbitrary components from two vectors to make a new vector.
+    Id OpVectorShuffle(Id result_type, Id vector_1, Id vector_2,
+                       std::span<const Literal> components);
+
+    /// Select arbitrary components from two vectors to make a new vector.
+    template <typename... Ts>
+    requires(...&& std::is_convertible_v<Ts, Literal>) Id
+        OpVectorShuffle(Id result_type, Id vector_1, Id vector_2, Ts&&... components) {
+        const Literal stack_components[] = {std::forward<Ts>(components)...};
+        return OpVectorShuffle(result_type, vector_1, vector_2,
+                               std::span<const Literal>{stack_components});
+    }
+
     /// Make a copy of a composite object, while modifying one part of it.
     Id OpCompositeInsert(Id result_type, Id object, Id composite,
                          std::span<const Literal> indexes = {});
@@ -576,6 +589,12 @@ public:
     /// Convert (value preserving) from unsigned integer to floating point.
     Id OpConvertUToF(Id result_type, Id operand);
 
+    /// Convert (value preserving) from unsigned integer to physical pointer.
+    Id OpConvertUToPtr(Id result_type, Id operand);
+
+    /// Convert (value preserving) from physical pointer to unsigned integer.
+    Id OpConvertPtrToU(Id result_type, Id operand);
+
     /// Convert (value preserving) unsigned width. This is either a truncate or a zero extend.
     Id OpUConvert(Id result_type, Id operand);
 
@@ -656,6 +675,14 @@ public:
     /// Integer multiplication of Operand 1 and Operand 2.
     Id OpIMul(Id result_type, Id operand_1, Id operand_2);
 
+    /// Result is the unsigned-integer multiplication of Operand 1 and Operand 2 producing a
+    /// two-component struct with the low- and high-order halves of the product.
+    Id OpUMulExtended(Id result_type, Id operand_1, Id operand_2);
+
+    /// Result is the signed-integer multiplication of Operand 1 and Operand 2 producing a
+    /// two-component struct with the low- and high-order halves of the product.
+    Id OpSMulExtended(Id result_type, Id operand_1, Id operand_2);
+
     /// Floating-point multiplication of Operand 1 and Operand 2.
     Id OpFMul(Id result_type, Id operand_1, Id operand_2);
 
@@ -685,6 +712,12 @@ public:
 
     /// Result is the unsigned integer addition of Operand 1 and Operand 2, including its carry.
     Id OpIAddCarry(Id result_type, Id operand_1, Id operand_2);
+
+    /// Scale a floating-point vector by a floating-point scalar.
+    Id OpVectorTimesScalar(Id result_type, Id vector, Id scalar);
+
+    /// Dot product of two floating-point vectors.
+    Id OpDot(Id result_type, Id vector_1, Id vector_2);
 
     // Extensions
 
@@ -768,6 +801,10 @@ public:
     /// Result is the reciprocal of sqrt x. Result is undefined if x <= 0.
     Id OpInverseSqrt(Id result_type, Id x);
 
+    /// Builds a floating-point number from x and the corresponding integral exponent of two in
+    /// exp.
+    Id OpLdexp(Id result_type, Id x, Id exp);
+
     /// Result is y if y < x; otherwise result is x. Which operand is the result is undefined if one
     /// of the operands is a NaN.
     Id OpFMin(Id result_type, Id x, Id y);
@@ -780,6 +817,10 @@ public:
     /// integers.
     Id OpSMin(Id result_type, Id x, Id y);
 
+    /// IEEE-754 minNum-style minimum: NaN-aware, returns the non-NaN operand if exactly one
+    /// is a NaN.
+    Id OpNMin(Id result_type, Id x, Id y);
+
     /// Result is y if x < y; otherwise result is x. Which operand is the result is undefined if one
     /// of the operands is a NaN.
     Id OpFMax(Id result_type, Id x, Id y);
@@ -791,6 +832,10 @@ public:
     /// Result is y if x < y; otherwise result is x, where x and y are interpreted as signed
     /// integers.
     Id OpSMax(Id result_type, Id x, Id y);
+
+    /// IEEE-754 maxNum-style maximum: NaN-aware, returns the non-NaN operand if exactly one
+    /// is a NaN.
+    Id OpNMax(Id result_type, Id x, Id y);
 
     /// Result is min(max(x, minVal), maxVal). Result is undefined if minVal > maxVal.The semantics
     /// used by min() and max() are those of FMin and FMax.
@@ -807,6 +852,10 @@ public:
     /// Computes a * b + c.
     Id OpFma(Id result_type, Id a, Id b, Id c);
 
+    /// Splits x into a normalized fraction in [0.5, 1) and an integral power of 2, returned as
+    /// a two-component struct {float significand, int exponent}.
+    Id OpFrexpStruct(Id result_type, Id x);
+
     /// Result is the unsigned integer obtained by converting the components of a two-component
     /// floating-point vector to the 16-bit OpTypeFloat, and then packing these two 16-bit integers
     /// into a 32-bit unsigned integer.
@@ -815,6 +864,30 @@ public:
     /// Result is the two-component floating-point vector with components obtained by unpacking a
     /// 32-bit unsigned integer into a pair of 16-bit values.
     Id OpUnpackHalf2x16(Id result_type, Id v);
+
+    /// Pack two normalized [0,1] floats into a 32-bit unsigned integer.
+    Id OpPackUnorm2x16(Id result_type, Id v);
+
+    /// Unpack a 32-bit unsigned integer into two normalized [0,1] floats.
+    Id OpUnpackUnorm2x16(Id result_type, Id v);
+
+    /// Pack two normalized [-1,1] floats into a 32-bit unsigned integer.
+    Id OpPackSnorm2x16(Id result_type, Id v);
+
+    /// Unpack a 32-bit unsigned integer into two normalized [-1,1] floats.
+    Id OpUnpackSnorm2x16(Id result_type, Id v);
+
+    /// Pack four normalized [0,1] floats into a 32-bit unsigned integer.
+    Id OpPackUnorm4x8(Id result_type, Id v);
+
+    /// Unpack a 32-bit unsigned integer into four normalized [0,1] floats.
+    Id OpUnpackUnorm4x8(Id result_type, Id v);
+
+    /// Pack four normalized [-1,1] floats into a 32-bit unsigned integer.
+    Id OpPackSnorm4x8(Id result_type, Id v);
+
+    /// Unpack a 32-bit unsigned integer into four normalized [-1,1] floats.
+    Id OpUnpackSnorm4x8(Id result_type, Id v);
 
     /// Integer least-significant bit.
     Id OpFindILsb(Id result_type, Id value);
@@ -836,6 +909,55 @@ public:
     /// Result is the value of the input interpolant variable sampled at an offset from the center
     /// of the pixel specified by offset.
     Id OpInterpolateAtOffset(Id result_type, Id interpolant, Id offset);
+
+    /// Result is x normalized to a unit-length vector.
+    Id OpNormalize(Id result_type, Id x);
+
+    /// Result is the cross product of two 3-component vectors.
+    Id OpCross(Id result_type, Id x, Id y);
+
+    /// Result is the length of vector x.
+    Id OpLength(Id result_type, Id x);
+
+    /// Linear interpolation of x and y by a (= x*(1-a) + y*a, componentwise).
+    Id OpFMix(Id result_type, Id x, Id y, Id a);
+
+    // AMD extensions
+
+    /// Returns the cube map face coordinate from a 3D direction (SPV_AMD_gcn_shader).
+    Id OpCubeFaceCoordAMD(Id result_type, Id cube_coord);
+
+    /// Returns the cube map face index from a 3D direction (SPV_AMD_gcn_shader).
+    Id OpCubeFaceIndexAMD(Id result_type, Id cube_coord);
+
+    /// Returns the current GPU clock as a 64-bit value (SPV_AMD_gcn_shader).
+    Id OpTimeAMD(Id result_type);
+
+    /// Three-input minimum / maximum / median (SPV_AMD_shader_trinary_minmax).
+    Id OpFMin3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpUMin3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpSMin3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpFMax3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpUMax3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpSMax3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpFMid3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpUMid3AMD(Id result_type, Id x, Id y, Id z);
+    Id OpSMid3AMD(Id result_type, Id x, Id y, Id z);
+
+    /// Sample interpolant at a specific provoking vertex
+    /// (SPV_AMD_shader_explicit_vertex_parameter).
+    Id OpInterpolateAtVertexAMD(Id result_type, Id interpolant, Id vertex_idx);
+
+    // Non-semantic extensions
+
+    /// Print formatted text from a shader (NonSemantic.DebugPrintf).
+    Id OpDebugPrintf(Id format, std::span<const Id> fmt_args);
+
+    /// Print formatted text from a shader (NonSemantic.DebugPrintf).
+    template <typename... Ts>
+    requires(...&& std::is_convertible_v<Ts, Id>) Id OpDebugPrintf(Id format, Ts&&... fmt_args) {
+        return OpDebugPrintf(format, std::span<const Id>({fmt_args...}));
+    }
 
     // Derivatives
 
@@ -1193,6 +1315,27 @@ public:
     /// otherwise, it is set to zero.
     Id OpGroupNonUniformBallot(Id result_type, Id scope, Id predicate);
 
+    /// Result is the value of the active invocation with the lowest id in the group.
+    Id OpGroupNonUniformBroadcastFirst(Id result_type, Id scope, Id value);
+
+    /// Returns true only in the active invocation with the lowest id in the group, false in
+    /// other active invocations.
+    Id OpGroupNonUniformElect(Id result_type, Id scope);
+
+    /// Returns true if the bit in Value corresponding to the executing invocation is set.
+    Id OpGroupNonUniformInverseBallot(Id result_type, Id scope, Id value);
+
+    /// Counts the number of bits set in Value (per the GroupOperation: Reduce / InclusiveScan
+    /// / ExclusiveScan).
+    Id OpGroupNonUniformBallotBitCount(Id result_type, Id scope, spv::GroupOperation group_op,
+                                       Id value);
+
+    /// Returns the smallest invocation id (LSB) set in Value.
+    Id OpGroupNonUniformBallotFindLSB(Id result_type, Id scope, Id value);
+
+    /// Broadcast a value from one invocation in the quad to all active invocations in the quad.
+    Id OpGroupNonUniformQuadBroadcast(Id result_type, Id scope, Id value, Id index);
+
     // Atomic
 
     /// Atomically load through Pointer using the given Semantics. All subparts of the value that is
@@ -1274,6 +1417,12 @@ public:
     /// 3) store the New Value back through Pointer.
     Id OpAtomicUMax(Id result_type, Id pointer, Id memory, Id semantics, Id value);
 
+    /// Atomic floating-point maximum (SPV_EXT_shader_atomic_float_min_max).
+    Id OpAtomicFMax(Id result_type, Id pointer, Id memory, Id semantics, Id value);
+
+    /// Atomic floating-point minimum (SPV_EXT_shader_atomic_float_min_max).
+    Id OpAtomicFMin(Id result_type, Id pointer, Id memory, Id semantics, Id value);
+
     /// Perform the following steps atomically with respect to any other atomic accesses within
     /// Scope to the same location:
     /// 1) load through Pointer to get an Original Value,
@@ -1297,6 +1446,10 @@ public:
 
 private:
     Id GetGLSLstd450();
+    Id GetNonSemanticDebugPrintf();
+    Id GetAmdGcnShader();
+    Id GetAmdShaderTrinaryMinMax();
+    Id GetAmdExplicitVertexParameter();
 
     std::uint32_t version{};
     std::uint32_t bound{};
@@ -1304,6 +1457,10 @@ private:
     std::unordered_set<std::string> extensions;
     std::unordered_set<spv::Capability> capabilities;
     std::optional<Id> glsl_std_450;
+    std::optional<Id> non_semantic_debug_printf;
+    std::optional<Id> amd_gcn_shader;
+    std::optional<Id> amd_shader_trinary_minmax;
+    std::optional<Id> amd_explicit_vertex_parameter;
 
     spv::AddressingModel addressing_model{spv::AddressingModel::Logical};
     spv::MemoryModel memory_model{spv::MemoryModel::GLSL450};
