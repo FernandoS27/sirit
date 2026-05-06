@@ -113,10 +113,19 @@ def method_to_opname(name):
     not correspond to a single SPIR-V opcode in the core grammar."""
     if name.startswith("Op"):
         return name
-    if name.startswith(("Type", "Constant")):
+    # Type-Declaration / Constant-Creation / SpecConstant* drop the "Op"
+    # prefix in sirit's API to read like factories.
+    if name.startswith(("Type", "Constant", "SpecConstant")):
         return "Op" + name
-    # The hand-written API drops the `Op` prefix for these few aliases.
-    if name in ("Decorate", "MemberDecorate", "Name", "MemberName", "String"):
+    # Annotation ops drop "Op" too -- both the existing Decorate/MemberDecorate
+    # and the newer DecorationGroup / GroupDecorate / GroupMemberDecorate.
+    if name in ("Decorate", "MemberDecorate", "DecorationGroup",
+                "GroupDecorate", "GroupMemberDecorate"):
+        return "Op" + name
+    # Debug metadata ops (Name / MemberName / String / Source* / NoLine /
+    # ModuleProcessed) drop "Op".
+    if name in ("Name", "MemberName", "String", "Source", "SourceContinued",
+                "SourceExtension", "NoLine", "ModuleProcessed"):
         return "Op" + name
     return None
 

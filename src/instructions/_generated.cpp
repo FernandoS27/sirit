@@ -1344,4 +1344,1444 @@ Id Module::OpAtomicXor(Id result_type, Id pointer, Id memory, Id semantics, Id v
     return *code << OpId{spv::Op::OpAtomicXor, result_type} << pointer << memory << semantics << value << EndOp{};
 }
 
+Id Module::DecorationGroup() {
+    annotations->Reserve(2);
+    return *annotations << OpId{spv::Op::OpDecorationGroup} << EndOp{};
+}
+
+Id Module::GroupDecorate(Id decoration_group, std::span<const Id> targets) {
+    annotations->Reserve(2 + targets.size());
+    return *annotations << spv::Op::OpGroupDecorate << decoration_group << targets << EndOp{};
+}
+
+Id Module::OpMatrixTimesScalar(Id result_type, Id matrix, Id scalar) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpMatrixTimesScalar, result_type} << matrix << scalar << EndOp{};
+}
+
+Id Module::OpVectorTimesMatrix(Id result_type, Id vector, Id matrix) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpVectorTimesMatrix, result_type} << vector << matrix << EndOp{};
+}
+
+Id Module::OpMatrixTimesVector(Id result_type, Id matrix, Id vector) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpMatrixTimesVector, result_type} << matrix << vector << EndOp{};
+}
+
+Id Module::OpMatrixTimesMatrix(Id result_type, Id left_matrix, Id right_matrix) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpMatrixTimesMatrix, result_type} << left_matrix << right_matrix << EndOp{};
+}
+
+Id Module::OpOuterProduct(Id result_type, Id vector_1, Id vector_2) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpOuterProduct, result_type} << vector_1 << vector_2 << EndOp{};
+}
+
+Id Module::OpISubBorrow(Id result_type, Id operand_1, Id operand_2) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpISubBorrow, result_type} << operand_1 << operand_2 << EndOp{};
+}
+
+Id Module::OpFmaKHR(Id result_type, Id operand_1, Id operand_2, Id operand_3) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpFmaKHR, result_type} << operand_1 << operand_2 << operand_3 << EndOp{};
+}
+
+Id Module::OpSDot(Id result_type, Id vector_1, Id vector_2, std::optional<spv::PackedVectorFormat> packed_vector_format) {
+    code->Reserve(5 + (packed_vector_format.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpSDot, result_type} << vector_1 << vector_2 << packed_vector_format << EndOp{};
+}
+
+Id Module::OpUDot(Id result_type, Id vector_1, Id vector_2, std::optional<spv::PackedVectorFormat> packed_vector_format) {
+    code->Reserve(5 + (packed_vector_format.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpUDot, result_type} << vector_1 << vector_2 << packed_vector_format << EndOp{};
+}
+
+Id Module::OpSUDot(Id result_type, Id vector_1, Id vector_2, std::optional<spv::PackedVectorFormat> packed_vector_format) {
+    code->Reserve(5 + (packed_vector_format.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpSUDot, result_type} << vector_1 << vector_2 << packed_vector_format << EndOp{};
+}
+
+Id Module::OpSDotAccSat(Id result_type, Id vector_1, Id vector_2, Id accumulator, std::optional<spv::PackedVectorFormat> packed_vector_format) {
+    code->Reserve(6 + (packed_vector_format.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpSDotAccSat, result_type} << vector_1 << vector_2 << accumulator << packed_vector_format << EndOp{};
+}
+
+Id Module::OpUDotAccSat(Id result_type, Id vector_1, Id vector_2, Id accumulator, std::optional<spv::PackedVectorFormat> packed_vector_format) {
+    code->Reserve(6 + (packed_vector_format.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpUDotAccSat, result_type} << vector_1 << vector_2 << accumulator << packed_vector_format << EndOp{};
+}
+
+Id Module::OpSUDotAccSat(Id result_type, Id vector_1, Id vector_2, Id accumulator, std::optional<spv::PackedVectorFormat> packed_vector_format) {
+    code->Reserve(6 + (packed_vector_format.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpSUDotAccSat, result_type} << vector_1 << vector_2 << accumulator << packed_vector_format << EndOp{};
+}
+
+Id Module::OpAtomicCompareExchangeWeak(Id result_type, Id pointer, Id memory, Id equal, Id unequal, Id value, Id comparator) {
+    code->Reserve(9);
+    return *code << OpId{spv::Op::OpAtomicCompareExchangeWeak, result_type} << pointer << memory << equal << unequal << value << comparator << EndOp{};
+}
+
+Id Module::OpAtomicFAddEXT(Id result_type, Id pointer, Id memory, Id semantics, Id value) {
+    code->Reserve(7);
+    return *code << OpId{spv::Op::OpAtomicFAddEXT, result_type} << pointer << memory << semantics << value << EndOp{};
+}
+
+Id Module::OpNamedBarrierInitialize(Id result_type, Id subgroup_count) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpNamedBarrierInitialize, result_type} << subgroup_count << EndOp{};
+}
+
+void Module::OpMemoryNamedBarrier(Id named_barrier, Id memory, Id semantics) {
+    code->Reserve(4);
+    *code << spv::Op::OpMemoryNamedBarrier << named_barrier << memory << semantics << EndOp{};
+}
+
+Id Module::OpCopyObject(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpCopyObject, result_type} << operand << EndOp{};
+}
+
+Id Module::OpTranspose(Id result_type, Id matrix) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpTranspose, result_type} << matrix << EndOp{};
+}
+
+Id Module::OpCopyLogical(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpCopyLogical, result_type} << operand << EndOp{};
+}
+
+Id Module::SpecConstantTrue(Id result_type) {
+    declarations->Reserve(3);
+    return *declarations << OpId{spv::Op::OpSpecConstantTrue, result_type} << EndOp{};
+}
+
+Id Module::SpecConstantFalse(Id result_type) {
+    declarations->Reserve(3);
+    return *declarations << OpId{spv::Op::OpSpecConstantFalse, result_type} << EndOp{};
+}
+
+Id Module::SpecConstant(Id result_type, Literal value) {
+    declarations->Reserve(5);
+    return *declarations << OpId{spv::Op::OpSpecConstant, result_type} << value << EndOp{};
+}
+
+Id Module::SpecConstantComposite(Id result_type, std::span<const Id> constituents) {
+    declarations->Reserve(3 + constituents.size());
+    return *declarations << OpId{spv::Op::OpSpecConstantComposite, result_type} << constituents << EndOp{};
+}
+
+void Module::OpLifetimeStart(Id pointer, std::uint32_t size) {
+    code->Reserve(3);
+    *code << spv::Op::OpLifetimeStart << pointer << size << EndOp{};
+}
+
+void Module::OpLifetimeStop(Id pointer, std::uint32_t size) {
+    code->Reserve(3);
+    *code << spv::Op::OpLifetimeStop << pointer << size << EndOp{};
+}
+
+void Module::SourceContinued(std::string_view continued_source) {
+    debug->Reserve(1 + WordsInString(continued_source));
+    *debug << spv::Op::OpSourceContinued << continued_source << EndOp{};
+}
+
+void Module::Source(spv::SourceLanguage source_language, std::uint32_t source_version, std::optional<Id> file, std::optional<std::string_view> source) {
+    debug->Reserve(3 + (file.has_value() ? 1 : 0) + (source.has_value() ? 1 : 0));
+    *debug << spv::Op::OpSource << source_language << source_version << file << source << EndOp{};
+}
+
+void Module::SourceExtension(std::string_view extension) {
+    debug->Reserve(1 + WordsInString(extension));
+    *debug << spv::Op::OpSourceExtension << extension << EndOp{};
+}
+
+void Module::NoLine() {
+    debug->Reserve(1);
+    *debug << spv::Op::OpNoLine << EndOp{};
+}
+
+void Module::ModuleProcessed(std::string_view process) {
+    debug->Reserve(1 + WordsInString(process));
+    *debug << spv::Op::OpModuleProcessed << process << EndOp{};
+}
+
+Id Module::OpGroupAsyncCopy(Id result_type, Id execution, Id destination, Id source, Id num_elements, Id stride, Id event) {
+    code->Reserve(9);
+    return *code << OpId{spv::Op::OpGroupAsyncCopy, result_type} << execution << destination << source << num_elements << stride << event << EndOp{};
+}
+
+void Module::OpGroupWaitEvents(Id execution, Id num_events, Id events_list) {
+    code->Reserve(4);
+    *code << spv::Op::OpGroupWaitEvents << execution << num_events << events_list << EndOp{};
+}
+
+Id Module::OpGroupAll(Id result_type, Id execution, Id predicate) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpGroupAll, result_type} << execution << predicate << EndOp{};
+}
+
+Id Module::OpGroupAny(Id result_type, Id execution, Id predicate) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpGroupAny, result_type} << execution << predicate << EndOp{};
+}
+
+Id Module::OpGroupBroadcast(Id result_type, Id execution, Id value, Id local_id) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupBroadcast, result_type} << execution << value << local_id << EndOp{};
+}
+
+Id Module::OpGroupIAdd(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupIAdd, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupFAdd(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupFAdd, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupFMin(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupFMin, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupUMin(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupUMin, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupSMin(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupSMin, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupFMax(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupFMax, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupUMax(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupUMax, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupSMax(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupSMax, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpSubgroupFirstInvocationKHR(Id result_type, Id value) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpSubgroupFirstInvocationKHR, result_type} << value << EndOp{};
+}
+
+Id Module::OpGroupNonUniformRotateKHR(Id result_type, Id execution, Id value, Id delta, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformRotateKHR, result_type} << execution << value << delta << cluster_size << EndOp{};
+}
+
+Id Module::OpUntypedGroupAsyncCopyKHR(Id result_type, Id execution, Id destination, Id source, Id element_num_bytes, Id num_elements, Id stride, Id event, std::optional<spv::MemoryAccessMask> destination_memory_operands, std::optional<spv::MemoryAccessMask> source_memory_operands) {
+    code->Reserve(10 + (destination_memory_operands.has_value() ? 1 : 0) + (source_memory_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpUntypedGroupAsyncCopyKHR, result_type} << execution << destination << source << element_num_bytes << num_elements << stride << event << destination_memory_operands << source_memory_operands << EndOp{};
+}
+
+Id Module::OpGroupIMulKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupIMulKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupFMulKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupFMulKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupBitwiseAndKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupBitwiseAndKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupBitwiseOrKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupBitwiseOrKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupBitwiseXorKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupBitwiseXorKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupLogicalAndKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupLogicalAndKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupLogicalOrKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupLogicalOrKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpGroupLogicalXorKHR(Id result_type, Id execution, spv::GroupOperation operation, Id x) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupLogicalXorKHR, result_type} << execution << operation << x << EndOp{};
+}
+
+Id Module::OpImageQueryFormat(Id result_type, Id image) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpImageQueryFormat, result_type} << image << EndOp{};
+}
+
+Id Module::OpImageQueryOrder(Id result_type, Id image) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpImageQueryOrder, result_type} << image << EndOp{};
+}
+
+Id Module::OpImageSparseSampleProjImplicitLod(Id result_type, Id sampled_image, Id coordinate, std::optional<spv::ImageOperandsMask> image_operands) {
+    code->Reserve(5 + (image_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpImageSparseSampleProjImplicitLod, result_type} << sampled_image << coordinate << image_operands << EndOp{};
+}
+
+Id Module::OpImageSparseSampleProjExplicitLod(Id result_type, Id sampled_image, Id coordinate, spv::ImageOperandsMask image_operands) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpImageSparseSampleProjExplicitLod, result_type} << sampled_image << coordinate << image_operands << EndOp{};
+}
+
+Id Module::OpImageSparseSampleProjDrefImplicitLod(Id result_type, Id sampled_image, Id coordinate, Id dref, std::optional<spv::ImageOperandsMask> image_operands) {
+    code->Reserve(6 + (image_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpImageSparseSampleProjDrefImplicitLod, result_type} << sampled_image << coordinate << dref << image_operands << EndOp{};
+}
+
+Id Module::OpImageSparseSampleProjDrefExplicitLod(Id result_type, Id sampled_image, Id coordinate, Id dref, spv::ImageOperandsMask image_operands) {
+    code->Reserve(7);
+    return *code << OpId{spv::Op::OpImageSparseSampleProjDrefExplicitLod, result_type} << sampled_image << coordinate << dref << image_operands << EndOp{};
+}
+
+Id Module::OpColorAttachmentReadEXT(Id result_type, Id attachment, std::optional<Id> sample) {
+    code->Reserve(4 + (sample.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpColorAttachmentReadEXT, result_type} << attachment << sample << EndOp{};
+}
+
+Id Module::OpDepthAttachmentReadEXT(Id result_type, std::optional<Id> sample) {
+    code->Reserve(3 + (sample.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpDepthAttachmentReadEXT, result_type} << sample << EndOp{};
+}
+
+Id Module::OpStencilAttachmentReadEXT(Id result_type, std::optional<Id> sample) {
+    code->Reserve(3 + (sample.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpStencilAttachmentReadEXT, result_type} << sample << EndOp{};
+}
+
+void Module::OpCopyMemory(Id target, Id source, std::optional<spv::MemoryAccessMask> memory_access, std::optional<spv::MemoryAccessMask> memory_access_2) {
+    code->Reserve(3 + (memory_access.has_value() ? 1 : 0) + (memory_access_2.has_value() ? 1 : 0));
+    *code << spv::Op::OpCopyMemory << target << source << memory_access << memory_access_2 << EndOp{};
+}
+
+void Module::OpCopyMemorySized(Id target, Id source, Id size, std::optional<spv::MemoryAccessMask> memory_access, std::optional<spv::MemoryAccessMask> memory_access_2) {
+    code->Reserve(4 + (memory_access.has_value() ? 1 : 0) + (memory_access_2.has_value() ? 1 : 0));
+    *code << spv::Op::OpCopyMemorySized << target << source << size << memory_access << memory_access_2 << EndOp{};
+}
+
+Id Module::OpInBoundsAccessChain(Id result_type, Id base, std::span<const Id> indexes) {
+    code->Reserve(4 + indexes.size());
+    return *code << OpId{spv::Op::OpInBoundsAccessChain, result_type} << base << indexes << EndOp{};
+}
+
+Id Module::OpPtrAccessChain(Id result_type, Id base, Id element, std::span<const Id> indexes) {
+    code->Reserve(5 + indexes.size());
+    return *code << OpId{spv::Op::OpPtrAccessChain, result_type} << base << element << indexes << EndOp{};
+}
+
+Id Module::OpArrayLength(Id result_type, Id structure, std::uint32_t array_member) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpArrayLength, result_type} << structure << array_member << EndOp{};
+}
+
+Id Module::OpInBoundsPtrAccessChain(Id result_type, Id base, Id element, std::span<const Id> indexes) {
+    code->Reserve(5 + indexes.size());
+    return *code << OpId{spv::Op::OpInBoundsPtrAccessChain, result_type} << base << element << indexes << EndOp{};
+}
+
+Id Module::OpPtrEqual(Id result_type, Id operand_1, Id operand_2) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpPtrEqual, result_type} << operand_1 << operand_2 << EndOp{};
+}
+
+Id Module::OpPtrNotEqual(Id result_type, Id operand_1, Id operand_2) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpPtrNotEqual, result_type} << operand_1 << operand_2 << EndOp{};
+}
+
+Id Module::OpPtrDiff(Id result_type, Id operand_1, Id operand_2) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpPtrDiff, result_type} << operand_1 << operand_2 << EndOp{};
+}
+
+void Module::OpNop() {
+    code->Reserve(1);
+    *code << spv::Op::OpNop << EndOp{};
+}
+
+Id Module::OpSizeOf(Id result_type, Id pointer) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpSizeOf, result_type} << pointer << EndOp{};
+}
+
+Id Module::OpPoisonKHR(Id result_type) {
+    code->Reserve(3);
+    return *code << OpId{spv::Op::OpPoisonKHR, result_type} << EndOp{};
+}
+
+Id Module::OpFreezeKHR(Id result_type, Id value) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpFreezeKHR, result_type} << value << EndOp{};
+}
+
+void Module::OpAssumeTrueKHR(Id condition) {
+    code->Reserve(2);
+    *code << spv::Op::OpAssumeTrueKHR << condition << EndOp{};
+}
+
+Id Module::OpExpectKHR(Id result_type, Id value, Id expected_value) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpExpectKHR, result_type} << value << expected_value << EndOp{};
+}
+
+Id Module::OpArithmeticFenceEXT(Id result_type, Id target) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpArithmeticFenceEXT, result_type} << target << EndOp{};
+}
+
+Id Module::OpGroupNonUniformBallotBitExtract(Id result_type, Id execution, Id value, Id index) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupNonUniformBallotBitExtract, result_type} << execution << value << index << EndOp{};
+}
+
+Id Module::OpGroupNonUniformBallotFindMSB(Id result_type, Id execution, Id value) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpGroupNonUniformBallotFindMSB, result_type} << execution << value << EndOp{};
+}
+
+Id Module::OpGroupNonUniformShuffleUp(Id result_type, Id execution, Id value, Id delta) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupNonUniformShuffleUp, result_type} << execution << value << delta << EndOp{};
+}
+
+Id Module::OpGroupNonUniformShuffleDown(Id result_type, Id execution, Id value, Id delta) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupNonUniformShuffleDown, result_type} << execution << value << delta << EndOp{};
+}
+
+Id Module::OpGroupNonUniformIAdd(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformIAdd, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformFAdd(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformFAdd, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformIMul(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformIMul, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformFMul(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformFMul, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformSMin(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformSMin, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformUMin(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformUMin, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformFMin(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformFMin, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformSMax(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformSMax, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformUMax(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformUMax, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformFMax(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformFMax, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformBitwiseAnd(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformBitwiseAnd, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformBitwiseOr(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformBitwiseOr, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformBitwiseXor(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformBitwiseXor, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformLogicalAnd(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformLogicalAnd, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformLogicalOr(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformLogicalOr, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformLogicalXor(Id result_type, Id execution, spv::GroupOperation operation, Id value, std::optional<Id> cluster_size) {
+    code->Reserve(6 + (cluster_size.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpGroupNonUniformLogicalXor, result_type} << execution << operation << value << cluster_size << EndOp{};
+}
+
+Id Module::OpGroupNonUniformQuadSwap(Id result_type, Id execution, Id value, Id direction) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpGroupNonUniformQuadSwap, result_type} << execution << value << direction << EndOp{};
+}
+
+Id Module::OpGroupNonUniformQuadAllKHR(Id result_type, Id predicate) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpGroupNonUniformQuadAllKHR, result_type} << predicate << EndOp{};
+}
+
+Id Module::OpGroupNonUniformQuadAnyKHR(Id result_type, Id predicate) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpGroupNonUniformQuadAnyKHR, result_type} << predicate << EndOp{};
+}
+
+Id Module::OpGroupNonUniformPartitionEXT(Id result_type, Id value) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpGroupNonUniformPartitionEXT, result_type} << value << EndOp{};
+}
+
+Id Module::OpIsFinite(Id result_type, Id x) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpIsFinite, result_type} << x << EndOp{};
+}
+
+Id Module::OpIsNormal(Id result_type, Id x) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpIsNormal, result_type} << x << EndOp{};
+}
+
+Id Module::OpSignBitSet(Id result_type, Id x) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpSignBitSet, result_type} << x << EndOp{};
+}
+
+Id Module::OpLessOrGreater(Id result_type, Id x, Id y) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpLessOrGreater, result_type} << x << y << EndOp{};
+}
+
+Id Module::OpOrdered(Id result_type, Id x, Id y) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpOrdered, result_type} << x << y << EndOp{};
+}
+
+Id Module::OpUnordered(Id result_type, Id x, Id y) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpUnordered, result_type} << x << y << EndOp{};
+}
+
+void Module::OpTraceRayKHR(Id accel, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id payload) {
+    code->Reserve(12);
+    *code << spv::Op::OpTraceRayKHR << accel << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << payload << EndOp{};
+}
+
+void Module::OpExecuteCallableKHR(Id sbt_index, Id callable_data) {
+    code->Reserve(3);
+    *code << spv::Op::OpExecuteCallableKHR << sbt_index << callable_data << EndOp{};
+}
+
+Id Module::OpConvertUToAccelerationStructureKHR(Id result_type, Id accel) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertUToAccelerationStructureKHR, result_type} << accel << EndOp{};
+}
+
+void Module::OpIgnoreIntersectionKHR() {
+    code->Reserve(1);
+    *code << spv::Op::OpIgnoreIntersectionKHR << EndOp{};
+}
+
+void Module::OpTerminateRayKHR() {
+    code->Reserve(1);
+    *code << spv::Op::OpTerminateRayKHR << EndOp{};
+}
+
+void Module::OpRayQueryInitializeKHR(Id ray_query, Id accel, Id ray_flags, Id cull_mask, Id ray_origin, Id ray_t_min, Id ray_direction, Id ray_t_max) {
+    code->Reserve(9);
+    *code << spv::Op::OpRayQueryInitializeKHR << ray_query << accel << ray_flags << cull_mask << ray_origin << ray_t_min << ray_direction << ray_t_max << EndOp{};
+}
+
+void Module::OpRayQueryTerminateKHR(Id ray_query) {
+    code->Reserve(2);
+    *code << spv::Op::OpRayQueryTerminateKHR << ray_query << EndOp{};
+}
+
+void Module::OpRayQueryGenerateIntersectionKHR(Id ray_query, Id hit_t) {
+    code->Reserve(3);
+    *code << spv::Op::OpRayQueryGenerateIntersectionKHR << ray_query << hit_t << EndOp{};
+}
+
+void Module::OpRayQueryConfirmIntersectionKHR(Id ray_query) {
+    code->Reserve(2);
+    *code << spv::Op::OpRayQueryConfirmIntersectionKHR << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryProceedKHR(Id result_type, Id ray_query) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpRayQueryProceedKHR, result_type} << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionTypeKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionTypeKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpReadClockKHR(Id result_type, Id scope) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpReadClockKHR, result_type} << scope << EndOp{};
+}
+
+void Module::OpEmitMeshTasksEXT(Id group_count_x, Id group_count_y, Id group_count_z, std::optional<Id> payload) {
+    code->Reserve(4 + (payload.has_value() ? 1 : 0));
+    *code << spv::Op::OpEmitMeshTasksEXT << group_count_x << group_count_y << group_count_z << payload << EndOp{};
+}
+
+void Module::OpSetMeshOutputsEXT(Id vertex_count, Id primitive_count) {
+    code->Reserve(3);
+    *code << spv::Op::OpSetMeshOutputsEXT << vertex_count << primitive_count << EndOp{};
+}
+
+Id Module::OpReportIntersectionKHR(Id result_type, Id hit, Id hit_kind) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpReportIntersectionKHR, result_type} << hit << hit_kind << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionTriangleVertexPositionsKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionTriangleVertexPositionsKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+void Module::OpBeginInvocationInterlockEXT() {
+    code->Reserve(1);
+    *code << spv::Op::OpBeginInvocationInterlockEXT << EndOp{};
+}
+
+void Module::OpEndInvocationInterlockEXT() {
+    code->Reserve(1);
+    *code << spv::Op::OpEndInvocationInterlockEXT << EndOp{};
+}
+
+Id Module::OpIsHelperInvocationEXT(Id result_type) {
+    code->Reserve(3);
+    return *code << OpId{spv::Op::OpIsHelperInvocationEXT, result_type} << EndOp{};
+}
+
+Id Module::OpRayQueryGetRayTMinKHR(Id result_type, Id ray_query) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpRayQueryGetRayTMinKHR, result_type} << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryGetRayFlagsKHR(Id result_type, Id ray_query) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpRayQueryGetRayFlagsKHR, result_type} << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionTKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionTKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionInstanceCustomIndexKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionInstanceCustomIndexKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionInstanceIdKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionInstanceIdKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionInstanceShaderBindingTableRecordOffsetKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionGeometryIndexKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionGeometryIndexKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionPrimitiveIndexKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionPrimitiveIndexKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionBarycentricsKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionBarycentricsKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionFrontFaceKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionFrontFaceKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionCandidateAABBOpaqueKHR(Id result_type, Id ray_query) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionCandidateAABBOpaqueKHR, result_type} << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionObjectRayDirectionKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionObjectRayDirectionKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionObjectRayOriginKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionObjectRayOriginKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetWorldRayDirectionKHR(Id result_type, Id ray_query) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpRayQueryGetWorldRayDirectionKHR, result_type} << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryGetWorldRayOriginKHR(Id result_type, Id ray_query) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpRayQueryGetWorldRayOriginKHR, result_type} << ray_query << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionObjectToWorldKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionObjectToWorldKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionWorldToObjectKHR(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionWorldToObjectKHR, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::TypePipeStorage() {
+    declarations->Reserve(2);
+    return *declarations << OpId{spv::Op::OpTypePipeStorage} << EndOp{};
+}
+
+Id Module::TypeNamedBarrier() {
+    declarations->Reserve(2);
+    return *declarations << OpId{spv::Op::OpTypeNamedBarrier} << EndOp{};
+}
+
+Id Module::TypeRayQueryKHR() {
+    declarations->Reserve(2);
+    return *declarations << OpId{spv::Op::OpTypeRayQueryKHR} << EndOp{};
+}
+
+Id Module::TypeAccelerationStructureKHR() {
+    declarations->Reserve(2);
+    return *declarations << OpId{spv::Op::OpTypeAccelerationStructureKHR} << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixMulAddKHR(Id result_type, Id a, Id b, Id c, std::optional<spv::CooperativeMatrixOperandsMask> cooperative_matrix_operands) {
+    code->Reserve(6 + (cooperative_matrix_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpCooperativeMatrixMulAddKHR, result_type} << a << b << c << cooperative_matrix_operands << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixReduceNV(Id result_type, Id matrix, spv::CooperativeMatrixReduceMask reduce, Id combine_func) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpCooperativeMatrixReduceNV, result_type} << matrix << reduce << combine_func << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixConvertNV(Id result_type, Id matrix) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpCooperativeMatrixConvertNV, result_type} << matrix << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixTransposeNV(Id result_type, Id matrix) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpCooperativeMatrixTransposeNV, result_type} << matrix << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixPerElementOpNV(Id result_type, Id matrix, Id func, std::span<const Id> operands) {
+    code->Reserve(5 + operands.size());
+    return *code << OpId{spv::Op::OpCooperativeMatrixPerElementOpNV, result_type} << matrix << func << operands << EndOp{};
+}
+
+Id Module::OpImageSampleFootprintNV(Id result_type, Id sampled_image, Id coordinate, Id granularity, Id coarse, std::optional<spv::ImageOperandsMask> image_operands) {
+    code->Reserve(7 + (image_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpImageSampleFootprintNV, result_type} << sampled_image << coordinate << granularity << coarse << image_operands << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixLoadKHR(Id result_type, Id pointer, Id memory_layout, std::optional<Id> stride, std::optional<spv::MemoryAccessMask> memory_operand) {
+    code->Reserve(5 + (stride.has_value() ? 1 : 0) + (memory_operand.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpCooperativeMatrixLoadKHR, result_type} << pointer << memory_layout << stride << memory_operand << EndOp{};
+}
+
+void Module::OpCooperativeMatrixStoreKHR(Id pointer, Id object, Id memory_layout, std::optional<Id> stride, std::optional<spv::MemoryAccessMask> memory_operand) {
+    code->Reserve(4 + (stride.has_value() ? 1 : 0) + (memory_operand.has_value() ? 1 : 0));
+    *code << spv::Op::OpCooperativeMatrixStoreKHR << pointer << object << memory_layout << stride << memory_operand << EndOp{};
+}
+
+Id Module::OpCooperativeVectorLoadNV(Id result_type, Id pointer, Id offset, std::optional<spv::MemoryAccessMask> memory_access) {
+    code->Reserve(5 + (memory_access.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpCooperativeVectorLoadNV, result_type} << pointer << offset << memory_access << EndOp{};
+}
+
+void Module::OpCooperativeVectorStoreNV(Id pointer, Id offset, Id object, std::optional<spv::MemoryAccessMask> memory_access) {
+    code->Reserve(4 + (memory_access.has_value() ? 1 : 0));
+    *code << spv::Op::OpCooperativeVectorStoreNV << pointer << offset << object << memory_access << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixLoadTensorNV(Id result_type, Id pointer, Id object, Id tensor_layout, spv::MemoryAccessMask memory_operand, spv::TensorAddressingOperandsMask tensor_addressing_operands) {
+    code->Reserve(8);
+    return *code << OpId{spv::Op::OpCooperativeMatrixLoadTensorNV, result_type} << pointer << object << tensor_layout << memory_operand << tensor_addressing_operands << EndOp{};
+}
+
+void Module::OpCooperativeMatrixStoreTensorNV(Id pointer, Id object, Id tensor_layout, spv::MemoryAccessMask memory_operand, spv::TensorAddressingOperandsMask tensor_addressing_operands) {
+    code->Reserve(6);
+    *code << spv::Op::OpCooperativeMatrixStoreTensorNV << pointer << object << tensor_layout << memory_operand << tensor_addressing_operands << EndOp{};
+}
+
+Id Module::OpRawAccessChainNV(Id result_type, Id base, Id byte_stride, Id element_index, Id byte_offset, std::optional<spv::RawAccessChainOperandsMask> raw_access_chain_operands) {
+    code->Reserve(7 + (raw_access_chain_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpRawAccessChainNV, result_type} << base << byte_stride << element_index << byte_offset << raw_access_chain_operands << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixLengthKHR(Id result_type, Id type) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpCooperativeMatrixLengthKHR, result_type} << type << EndOp{};
+}
+
+void Module::OpHitObjectRecordHitMotionNV(Id hit_object, Id acceleration_structure, Id instance_id, Id primitive_id, Id geometry_index, Id hit_kind, Id sbt_record_offset, Id sbt_record_stride, Id origin, Id t_min, Id direction, Id t_max, Id current_time, Id hit_object_attributes) {
+    code->Reserve(15);
+    *code << spv::Op::OpHitObjectRecordHitMotionNV << hit_object << acceleration_structure << instance_id << primitive_id << geometry_index << hit_kind << sbt_record_offset << sbt_record_stride << origin << t_min << direction << t_max << current_time << hit_object_attributes << EndOp{};
+}
+
+void Module::OpHitObjectRecordHitWithIndexMotionNV(Id hit_object, Id acceleration_structure, Id instance_id, Id primitive_id, Id geometry_index, Id hit_kind, Id sbt_record_index, Id origin, Id t_min, Id direction, Id t_max, Id current_time, Id hit_object_attributes) {
+    code->Reserve(14);
+    *code << spv::Op::OpHitObjectRecordHitWithIndexMotionNV << hit_object << acceleration_structure << instance_id << primitive_id << geometry_index << hit_kind << sbt_record_index << origin << t_min << direction << t_max << current_time << hit_object_attributes << EndOp{};
+}
+
+void Module::OpHitObjectRecordMissMotionNV(Id hit_object, Id sbt_index, Id origin, Id t_min, Id direction, Id t_max, Id current_time) {
+    code->Reserve(8);
+    *code << spv::Op::OpHitObjectRecordMissMotionNV << hit_object << sbt_index << origin << t_min << direction << t_max << current_time << EndOp{};
+}
+
+Id Module::OpHitObjectGetWorldToObjectNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetWorldToObjectNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetObjectToWorldNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetObjectToWorldNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetObjectRayDirectionNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetObjectRayDirectionNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetObjectRayOriginNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetObjectRayOriginNV, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectTraceRayMotionNV(Id hit_object, Id acceleration_structure, Id ray_flags, Id cullmask, Id sbt_record_offset, Id sbt_record_stride, Id miss_index, Id origin, Id t_min, Id direction, Id t_max, Id time, Id payload) {
+    code->Reserve(14);
+    *code << spv::Op::OpHitObjectTraceRayMotionNV << hit_object << acceleration_structure << ray_flags << cullmask << sbt_record_offset << sbt_record_stride << miss_index << origin << t_min << direction << t_max << time << payload << EndOp{};
+}
+
+Id Module::OpHitObjectGetShaderRecordBufferHandleNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetShaderRecordBufferHandleNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetShaderBindingTableRecordIndexNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetShaderBindingTableRecordIndexNV, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectRecordEmptyNV(Id hit_object) {
+    code->Reserve(2);
+    *code << spv::Op::OpHitObjectRecordEmptyNV << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectTraceRayNV(Id hit_object, Id acceleration_structure, Id ray_flags, Id cullmask, Id sbt_record_offset, Id sbt_record_stride, Id miss_index, Id origin, Id t_min, Id direction, Id t_max, Id payload) {
+    code->Reserve(13);
+    *code << spv::Op::OpHitObjectTraceRayNV << hit_object << acceleration_structure << ray_flags << cullmask << sbt_record_offset << sbt_record_stride << miss_index << origin << t_min << direction << t_max << payload << EndOp{};
+}
+
+void Module::OpHitObjectRecordHitNV(Id hit_object, Id acceleration_structure, Id instance_id, Id primitive_id, Id geometry_index, Id hit_kind, Id sbt_record_offset, Id sbt_record_stride, Id origin, Id t_min, Id direction, Id t_max, Id hit_object_attributes) {
+    code->Reserve(14);
+    *code << spv::Op::OpHitObjectRecordHitNV << hit_object << acceleration_structure << instance_id << primitive_id << geometry_index << hit_kind << sbt_record_offset << sbt_record_stride << origin << t_min << direction << t_max << hit_object_attributes << EndOp{};
+}
+
+void Module::OpHitObjectRecordHitWithIndexNV(Id hit_object, Id acceleration_structure, Id instance_id, Id primitive_id, Id geometry_index, Id hit_kind, Id sbt_record_index, Id origin, Id t_min, Id direction, Id t_max, Id hit_object_attributes) {
+    code->Reserve(13);
+    *code << spv::Op::OpHitObjectRecordHitWithIndexNV << hit_object << acceleration_structure << instance_id << primitive_id << geometry_index << hit_kind << sbt_record_index << origin << t_min << direction << t_max << hit_object_attributes << EndOp{};
+}
+
+void Module::OpHitObjectRecordMissNV(Id hit_object, Id sbt_index, Id origin, Id t_min, Id direction, Id t_max) {
+    code->Reserve(7);
+    *code << spv::Op::OpHitObjectRecordMissNV << hit_object << sbt_index << origin << t_min << direction << t_max << EndOp{};
+}
+
+void Module::OpHitObjectExecuteShaderNV(Id hit_object, Id payload) {
+    code->Reserve(3);
+    *code << spv::Op::OpHitObjectExecuteShaderNV << hit_object << payload << EndOp{};
+}
+
+Id Module::OpHitObjectGetCurrentTimeNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetCurrentTimeNV, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectGetAttributesNV(Id hit_object, Id hit_object_attribute) {
+    code->Reserve(3);
+    *code << spv::Op::OpHitObjectGetAttributesNV << hit_object << hit_object_attribute << EndOp{};
+}
+
+Id Module::OpHitObjectGetHitKindNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetHitKindNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetPrimitiveIndexNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetPrimitiveIndexNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetGeometryIndexNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetGeometryIndexNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetInstanceIdNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetInstanceIdNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetInstanceCustomIndexNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetInstanceCustomIndexNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetWorldRayDirectionNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetWorldRayDirectionNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetWorldRayOriginNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetWorldRayOriginNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetRayTMaxNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetRayTMaxNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetRayTMinNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetRayTMinNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsEmptyNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsEmptyNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsHitNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsHitNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsMissNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsMissNV, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpReorderThreadWithHitObjectNV(Id hit_object, std::optional<Id> hint, std::optional<Id> bits) {
+    code->Reserve(2 + (hint.has_value() ? 1 : 0) + (bits.has_value() ? 1 : 0));
+    *code << spv::Op::OpReorderThreadWithHitObjectNV << hit_object << hint << bits << EndOp{};
+}
+
+void Module::OpReorderThreadWithHintNV(Id hint, Id bits) {
+    code->Reserve(3);
+    *code << spv::Op::OpReorderThreadWithHintNV << hint << bits << EndOp{};
+}
+
+Id Module::OpCooperativeVectorMatrixMulNV(Id result_type, Id input, Id input_interpretation, Id matrix, Id matrix_offset, Id matrix_interpretation, Id m, Id k, Id memory_layout, Id transpose, std::optional<Id> matrix_stride, std::optional<spv::CooperativeMatrixOperandsMask> cooperative_matrix_operands) {
+    code->Reserve(12 + (matrix_stride.has_value() ? 1 : 0) + (cooperative_matrix_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpCooperativeVectorMatrixMulNV, result_type} << input << input_interpretation << matrix << matrix_offset << matrix_interpretation << m << k << memory_layout << transpose << matrix_stride << cooperative_matrix_operands << EndOp{};
+}
+
+void Module::OpCooperativeVectorOuterProductAccumulateNV(Id pointer, Id offset, Id a, Id b, Id memory_layout, Id matrix_interpretation, std::optional<Id> matrix_stride) {
+    code->Reserve(7 + (matrix_stride.has_value() ? 1 : 0));
+    *code << spv::Op::OpCooperativeVectorOuterProductAccumulateNV << pointer << offset << a << b << memory_layout << matrix_interpretation << matrix_stride << EndOp{};
+}
+
+void Module::OpCooperativeVectorReduceSumAccumulateNV(Id pointer, Id offset, Id v) {
+    code->Reserve(4);
+    *code << spv::Op::OpCooperativeVectorReduceSumAccumulateNV << pointer << offset << v << EndOp{};
+}
+
+Id Module::OpCooperativeVectorMatrixMulAddNV(Id result_type, Id input, Id input_interpretation, Id matrix, Id matrix_offset, Id matrix_interpretation, Id bias, Id bias_offset, Id bias_interpretation, Id m, Id k, Id memory_layout, Id transpose, std::optional<Id> matrix_stride, std::optional<spv::CooperativeMatrixOperandsMask> cooperative_matrix_operands) {
+    code->Reserve(15 + (matrix_stride.has_value() ? 1 : 0) + (cooperative_matrix_operands.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpCooperativeVectorMatrixMulAddNV, result_type} << input << input_interpretation << matrix << matrix_offset << matrix_interpretation << bias << bias_offset << bias_interpretation << m << k << memory_layout << transpose << matrix_stride << cooperative_matrix_operands << EndOp{};
+}
+
+void Module::OpWritePackedPrimitiveIndices4x8NV(Id index_offset, Id packed_indices) {
+    code->Reserve(3);
+    *code << spv::Op::OpWritePackedPrimitiveIndices4x8NV << index_offset << packed_indices << EndOp{};
+}
+
+Id Module::OpFetchMicroTriangleVertexPositionNV(Id result_type, Id accel, Id instance_id, Id geometry_index, Id primitive_index, Id barycentric) {
+    code->Reserve(8);
+    return *code << OpId{spv::Op::OpFetchMicroTriangleVertexPositionNV, result_type} << accel << instance_id << geometry_index << primitive_index << barycentric << EndOp{};
+}
+
+Id Module::OpFetchMicroTriangleVertexBarycentricNV(Id result_type, Id accel, Id instance_id, Id geometry_index, Id primitive_index, Id barycentric) {
+    code->Reserve(8);
+    return *code << OpId{spv::Op::OpFetchMicroTriangleVertexBarycentricNV, result_type} << accel << instance_id << geometry_index << primitive_index << barycentric << EndOp{};
+}
+
+void Module::OpHitObjectRecordFromQueryEXT(Id hit_object, Id ray_query, Id sbt_record_index, Id hit_object_attributes, std::optional<Id> hit_kind) {
+    code->Reserve(5 + (hit_kind.has_value() ? 1 : 0));
+    *code << spv::Op::OpHitObjectRecordFromQueryEXT << hit_object << ray_query << sbt_record_index << hit_object_attributes << hit_kind << EndOp{};
+}
+
+void Module::OpHitObjectRecordMissEXT(Id hit_object, Id ray_flags, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax) {
+    code->Reserve(8);
+    *code << spv::Op::OpHitObjectRecordMissEXT << hit_object << ray_flags << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << EndOp{};
+}
+
+void Module::OpHitObjectRecordMissMotionEXT(Id hit_object, Id ray_flags, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id current_time) {
+    code->Reserve(9);
+    *code << spv::Op::OpHitObjectRecordMissMotionEXT << hit_object << ray_flags << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << current_time << EndOp{};
+}
+
+Id Module::OpHitObjectGetIntersectionTriangleVertexPositionsEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetIntersectionTriangleVertexPositionsEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetRayFlagsEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetRayFlagsEXT, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectSetShaderBindingTableRecordIndexEXT(Id hit_object, Id sbt_record_index) {
+    code->Reserve(3);
+    *code << spv::Op::OpHitObjectSetShaderBindingTableRecordIndexEXT << hit_object << sbt_record_index << EndOp{};
+}
+
+void Module::OpHitObjectReorderExecuteShaderEXT(Id hit_object, Id payload, std::optional<Id> hint, std::optional<Id> bits) {
+    code->Reserve(3 + (hint.has_value() ? 1 : 0) + (bits.has_value() ? 1 : 0));
+    *code << spv::Op::OpHitObjectReorderExecuteShaderEXT << hit_object << payload << hint << bits << EndOp{};
+}
+
+void Module::OpHitObjectTraceReorderExecuteEXT(Id hit_object, Id acceleration_structure, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id payload, std::optional<Id> hint, std::optional<Id> bits) {
+    code->Reserve(13 + (hint.has_value() ? 1 : 0) + (bits.has_value() ? 1 : 0));
+    *code << spv::Op::OpHitObjectTraceReorderExecuteEXT << hit_object << acceleration_structure << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << payload << hint << bits << EndOp{};
+}
+
+void Module::OpHitObjectTraceMotionReorderExecuteEXT(Id hit_object, Id acceleration_structure, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id current_time, Id payload, std::optional<Id> hint, std::optional<Id> bits) {
+    code->Reserve(14 + (hint.has_value() ? 1 : 0) + (bits.has_value() ? 1 : 0));
+    *code << spv::Op::OpHitObjectTraceMotionReorderExecuteEXT << hit_object << acceleration_structure << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << current_time << payload << hint << bits << EndOp{};
+}
+
+void Module::OpReorderThreadWithHintEXT(Id hint, Id bits) {
+    code->Reserve(3);
+    *code << spv::Op::OpReorderThreadWithHintEXT << hint << bits << EndOp{};
+}
+
+void Module::OpReorderThreadWithHitObjectEXT(Id hit_object, std::optional<Id> hint, std::optional<Id> bits) {
+    code->Reserve(2 + (hint.has_value() ? 1 : 0) + (bits.has_value() ? 1 : 0));
+    *code << spv::Op::OpReorderThreadWithHitObjectEXT << hit_object << hint << bits << EndOp{};
+}
+
+void Module::OpHitObjectTraceRayEXT(Id hit_object, Id acceleration_structure, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id payload) {
+    code->Reserve(13);
+    *code << spv::Op::OpHitObjectTraceRayEXT << hit_object << acceleration_structure << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << payload << EndOp{};
+}
+
+void Module::OpHitObjectTraceRayMotionEXT(Id hit_object, Id acceleration_structure, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id current_time, Id payload) {
+    code->Reserve(14);
+    *code << spv::Op::OpHitObjectTraceRayMotionEXT << hit_object << acceleration_structure << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << current_time << payload << EndOp{};
+}
+
+void Module::OpHitObjectRecordEmptyEXT(Id hit_object) {
+    code->Reserve(2);
+    *code << spv::Op::OpHitObjectRecordEmptyEXT << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectExecuteShaderEXT(Id hit_object, Id payload) {
+    code->Reserve(3);
+    *code << spv::Op::OpHitObjectExecuteShaderEXT << hit_object << payload << EndOp{};
+}
+
+Id Module::OpHitObjectGetCurrentTimeEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetCurrentTimeEXT, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpHitObjectGetAttributesEXT(Id hit_object, Id hit_object_attribute) {
+    code->Reserve(3);
+    *code << spv::Op::OpHitObjectGetAttributesEXT << hit_object << hit_object_attribute << EndOp{};
+}
+
+Id Module::OpHitObjectGetHitKindEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetHitKindEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetPrimitiveIndexEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetPrimitiveIndexEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetGeometryIndexEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetGeometryIndexEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetInstanceIdEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetInstanceIdEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetInstanceCustomIndexEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetInstanceCustomIndexEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetObjectRayOriginEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetObjectRayOriginEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetObjectRayDirectionEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetObjectRayDirectionEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetWorldRayDirectionEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetWorldRayDirectionEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetWorldRayOriginEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetWorldRayOriginEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetObjectToWorldEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetObjectToWorldEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetWorldToObjectEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetWorldToObjectEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetRayTMaxEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetRayTMaxEXT, result_type} << hit_object << EndOp{};
+}
+
+void Module::OpIgnoreIntersectionNV() {
+    code->Reserve(1);
+    *code << spv::Op::OpIgnoreIntersectionNV << EndOp{};
+}
+
+void Module::OpTerminateRayNV() {
+    code->Reserve(1);
+    *code << spv::Op::OpTerminateRayNV << EndOp{};
+}
+
+void Module::OpTraceNV(Id accel, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id payload_id) {
+    code->Reserve(12);
+    *code << spv::Op::OpTraceNV << accel << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << payload_id << EndOp{};
+}
+
+void Module::OpTraceMotionNV(Id accel, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id time, Id payload_id) {
+    code->Reserve(13);
+    *code << spv::Op::OpTraceMotionNV << accel << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << time << payload_id << EndOp{};
+}
+
+void Module::OpTraceRayMotionNV(Id accel, Id ray_flags, Id cull_mask, Id sbt_offset, Id sbt_stride, Id miss_index, Id ray_origin, Id ray_tmin, Id ray_direction, Id ray_tmax, Id time, Id payload) {
+    code->Reserve(13);
+    *code << spv::Op::OpTraceRayMotionNV << accel << ray_flags << cull_mask << sbt_offset << sbt_stride << miss_index << ray_origin << ray_tmin << ray_direction << ray_tmax << time << payload << EndOp{};
+}
+
+void Module::OpExecuteCallableNV(Id sbt_index, Id callable_data_id) {
+    code->Reserve(3);
+    *code << spv::Op::OpExecuteCallableNV << sbt_index << callable_data_id << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionClusterIdNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionClusterIdNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpHitObjectGetClusterIdNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetClusterIdNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetRayTMinEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetRayTMinEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetShaderBindingTableRecordIndexEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetShaderBindingTableRecordIndexEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetShaderRecordBufferHandleEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetShaderRecordBufferHandleEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsEmptyEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsEmptyEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsHitEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsHitEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsMissEXT(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsMissEXT, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixLoadNV(Id result_type, Id pointer, Id stride, Id column_major, std::optional<spv::MemoryAccessMask> memory_access) {
+    code->Reserve(6 + (memory_access.has_value() ? 1 : 0));
+    return *code << OpId{spv::Op::OpCooperativeMatrixLoadNV, result_type} << pointer << stride << column_major << memory_access << EndOp{};
+}
+
+void Module::OpCooperativeMatrixStoreNV(Id pointer, Id object, Id stride, Id column_major, std::optional<spv::MemoryAccessMask> memory_access) {
+    code->Reserve(5 + (memory_access.has_value() ? 1 : 0));
+    *code << spv::Op::OpCooperativeMatrixStoreNV << pointer << object << stride << column_major << memory_access << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixMulAddNV(Id result_type, Id a, Id b, Id c) {
+    code->Reserve(6);
+    return *code << OpId{spv::Op::OpCooperativeMatrixMulAddNV, result_type} << a << b << c << EndOp{};
+}
+
+Id Module::OpCooperativeMatrixLengthNV(Id result_type, Id type) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpCooperativeMatrixLengthNV, result_type} << type << EndOp{};
+}
+
+Id Module::OpCreateTensorLayoutNV(Id result_type) {
+    code->Reserve(3);
+    return *code << OpId{spv::Op::OpCreateTensorLayoutNV, result_type} << EndOp{};
+}
+
+Id Module::OpTensorLayoutSetDimensionNV(Id result_type, Id tensor_layout, std::span<const Id> dim) {
+    code->Reserve(4 + dim.size());
+    return *code << OpId{spv::Op::OpTensorLayoutSetDimensionNV, result_type} << tensor_layout << dim << EndOp{};
+}
+
+Id Module::OpTensorLayoutSetStrideNV(Id result_type, Id tensor_layout, std::span<const Id> stride) {
+    code->Reserve(4 + stride.size());
+    return *code << OpId{spv::Op::OpTensorLayoutSetStrideNV, result_type} << tensor_layout << stride << EndOp{};
+}
+
+Id Module::OpTensorLayoutSliceNV(Id result_type, Id tensor_layout, std::span<const Id> operands) {
+    code->Reserve(4 + operands.size());
+    return *code << OpId{spv::Op::OpTensorLayoutSliceNV, result_type} << tensor_layout << operands << EndOp{};
+}
+
+Id Module::OpTensorLayoutSetClampValueNV(Id result_type, Id tensor_layout, Id value) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpTensorLayoutSetClampValueNV, result_type} << tensor_layout << value << EndOp{};
+}
+
+Id Module::OpCreateTensorViewNV(Id result_type) {
+    code->Reserve(3);
+    return *code << OpId{spv::Op::OpCreateTensorViewNV, result_type} << EndOp{};
+}
+
+Id Module::OpTensorViewSetDimensionNV(Id result_type, Id tensor_view, std::span<const Id> dim) {
+    code->Reserve(4 + dim.size());
+    return *code << OpId{spv::Op::OpTensorViewSetDimensionNV, result_type} << tensor_view << dim << EndOp{};
+}
+
+Id Module::OpTensorViewSetStrideNV(Id result_type, Id tensor_view, std::span<const Id> stride) {
+    code->Reserve(4 + stride.size());
+    return *code << OpId{spv::Op::OpTensorViewSetStrideNV, result_type} << tensor_view << stride << EndOp{};
+}
+
+Id Module::OpTensorViewSetClipNV(Id result_type, Id tensor_view, Id clip_row_offset, Id clip_row_span, Id clip_col_offset, Id clip_col_span) {
+    code->Reserve(8);
+    return *code << OpId{spv::Op::OpTensorViewSetClipNV, result_type} << tensor_view << clip_row_offset << clip_row_span << clip_col_offset << clip_col_span << EndOp{};
+}
+
+Id Module::OpTensorLayoutSetBlockSizeNV(Id result_type, Id tensor_layout, std::span<const Id> block_size) {
+    code->Reserve(4 + block_size.size());
+    return *code << OpId{spv::Op::OpTensorLayoutSetBlockSizeNV, result_type} << tensor_layout << block_size << EndOp{};
+}
+
+Id Module::OpConvertUToImageNV(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertUToImageNV, result_type} << operand << EndOp{};
+}
+
+Id Module::OpConvertUToSamplerNV(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertUToSamplerNV, result_type} << operand << EndOp{};
+}
+
+Id Module::OpConvertImageToUNV(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertImageToUNV, result_type} << operand << EndOp{};
+}
+
+Id Module::OpConvertSamplerToUNV(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertSamplerToUNV, result_type} << operand << EndOp{};
+}
+
+Id Module::OpConvertUToSampledImageNV(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertUToSampledImageNV, result_type} << operand << EndOp{};
+}
+
+Id Module::OpConvertSampledImageToUNV(Id result_type, Id operand) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpConvertSampledImageToUNV, result_type} << operand << EndOp{};
+}
+
+void Module::OpSamplerImageAddressingModeNV(std::uint32_t bit_width) {
+    code->Reserve(2);
+    *code << spv::Op::OpSamplerImageAddressingModeNV << bit_width << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionSpherePositionNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionSpherePositionNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionSphereRadiusNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionSphereRadiusNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionLSSPositionsNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionLSSPositionsNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionLSSRadiiNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionLSSRadiiNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryGetIntersectionLSSHitValueNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryGetIntersectionLSSHitValueNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpHitObjectGetSpherePositionNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetSpherePositionNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetSphereRadiusNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetSphereRadiusNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetLSSPositionsNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetLSSPositionsNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectGetLSSRadiiNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectGetLSSRadiiNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsSphereHitNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsSphereHitNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpHitObjectIsLSSHitNV(Id result_type, Id hit_object) {
+    code->Reserve(4);
+    return *code << OpId{spv::Op::OpHitObjectIsLSSHitNV, result_type} << hit_object << EndOp{};
+}
+
+Id Module::OpRayQueryIsSphereHitNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryIsSphereHitNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::OpRayQueryIsLSSHitNV(Id result_type, Id ray_query, Id intersection) {
+    code->Reserve(5);
+    return *code << OpId{spv::Op::OpRayQueryIsLSSHitNV, result_type} << ray_query << intersection << EndOp{};
+}
+
+Id Module::TypeCooperativeMatrixKHR(Id component_type, Id scope, Id rows, Id columns, Id use) {
+    declarations->Reserve(7);
+    return *declarations << OpId{spv::Op::OpTypeCooperativeMatrixKHR} << component_type << scope << rows << columns << use << EndOp{};
+}
+
+Id Module::TypeHitObjectNV() {
+    declarations->Reserve(2);
+    return *declarations << OpId{spv::Op::OpTypeHitObjectNV} << EndOp{};
+}
+
+Id Module::TypeHitObjectEXT() {
+    declarations->Reserve(2);
+    return *declarations << OpId{spv::Op::OpTypeHitObjectEXT} << EndOp{};
+}
+
+Id Module::TypeCooperativeMatrixNV(Id component_type, Id execution, Id rows, Id columns) {
+    declarations->Reserve(6);
+    return *declarations << OpId{spv::Op::OpTypeCooperativeMatrixNV} << component_type << execution << rows << columns << EndOp{};
+}
+
+Id Module::TypeTensorLayoutNV(Id dim, Id clamp_mode) {
+    declarations->Reserve(4);
+    return *declarations << OpId{spv::Op::OpTypeTensorLayoutNV} << dim << clamp_mode << EndOp{};
+}
+
+Id Module::TypeTensorViewNV(Id dim, Id has_dimensions, std::span<const Id> p) {
+    declarations->Reserve(4 + p.size());
+    return *declarations << OpId{spv::Op::OpTypeTensorViewNV} << dim << has_dimensions << p << EndOp{};
+}
+
 } // namespace Sirit
